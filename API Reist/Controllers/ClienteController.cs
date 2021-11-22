@@ -10,7 +10,7 @@ namespace API_Reist.Controllers
 {
     public class ClienteController : Controller
     {
-        Cliente cliente = new Cliente();
+        Cliente client = new Cliente();
 
         [HttpGet]
         [ActionName("Listar")]
@@ -19,12 +19,28 @@ namespace API_Reist.Controllers
             //return cliente.ListarClientes();
             try
             {
-                return cliente.ListarClientes();
+                return client.ListarClientes();
             }
             catch
             {
                 RedirectToAction("Index", "Home");
                 return null;
+            }
+        }
+
+        [HttpPost]
+        [ActionName("Cadastrar")]
+        public bool Insert([FromBody] Cliente cliente)
+        {
+            //return cliente.Insert();
+            try
+            {
+                cliente.Insert();
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }
