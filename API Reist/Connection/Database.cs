@@ -16,6 +16,7 @@ namespace API_Reist.Connection
         public Database()
         {
             connection = new MySqlConnection("server = localhost; port = 3306; database = reist_2021; user id = root; password = root");
+            //connection = new MySqlConnection("server = reistdatabase.mysql.database.azure.com; port = 3306; database = reist_2021; user id = admreistdatabase@reistdatabase; password = LinkenUp2019");
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
         }
@@ -30,6 +31,19 @@ namespace API_Reist.Connection
         {
             command = new MySqlCommand(comando, connection);
             return command.ExecuteReader();
+
+            /*try
+            {
+                command = new MySqlCommand(comando, connection);
+                return command.ExecuteReader();
+            }
+            catch
+            {
+                connection.Close(); connection.Open();
+                connection = connection = new MySqlConnection("server = localhost; port = 3306; database = reist_2021; user id = root; password = root");
+                command = new MySqlCommand(comando, connection);
+                return command.ExecuteReader();
+            }*/
         }
 
         public void Dispose()

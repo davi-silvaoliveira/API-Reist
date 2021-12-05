@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections;
 using API_Reist.Models;
 
 namespace API_Reist.Controllers
 {
-    public class PassagemController : Controller
+    public class HotelController : Controller
     {
-        Passagem passagem = new Passagem();
+        Hotel hotel = new Hotel();
 
         [HttpGet]
         [ActionName("Buscar")]
-        public IEnumerable ListBy(string origem, string destino, string data)
+        public IEnumerable ListBy(string estado)
         {
-            return passagem.BuscarPassagensIda(origem, destino, data);
+            return hotel.BuscarHotel(estado);
         }
     }
 }
