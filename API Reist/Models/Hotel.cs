@@ -14,7 +14,7 @@ namespace API_Reist.Models
         public string descricao { get; set; }
         public Endereco endereco { get; set; }
 
-        public List<Hotel> BuscarHotel(string estado)
+        public List<Hotel> BuscarHotel(string cidade, string estado)
         {
             using (Database DB = new Database())
             {
@@ -32,8 +32,12 @@ namespace API_Reist.Models
             {
                 var endereco = new Endereco()
                 {
-                    cep = retorno["endereco"].ToString(),
+                    cep = retorno["cep"].ToString(),
                     numero = int.Parse(retorno["numero_endereco"].ToString()),
+                    logradouro = retorno["logradouro"].ToString(),
+                    bairro = retorno["bairro"].ToString(),
+                    cidade = retorno["cidade"].ToString(),
+                    uf = retorno["estado"].ToString(),
                 };
             
                 var hotel = new Hotel()

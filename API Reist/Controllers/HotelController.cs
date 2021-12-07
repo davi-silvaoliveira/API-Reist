@@ -14,9 +14,9 @@ namespace API_Reist.Controllers
 
         [HttpGet]
         [ActionName("Buscar")]
-        public IEnumerable ListBy(string estado)
+        public IEnumerable List(string cidade, string estado)
         {
-            return hotel.BuscarHotel(estado);
+            return hotel.BuscarHotel(cidade, estado);
         }
     }
 }

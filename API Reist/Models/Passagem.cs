@@ -21,11 +21,17 @@ namespace API_Reist.Models
         //public string preco_economica { get; set; }
         public string preco { get; set; }
 
-        public List<Passagem> BuscarPassagensIda(string origem, string destino, string data)
+        public List<Passagem> BuscarPassagensIda(string origem, string destino, string data, int classe)
         {
             using (Database DB = new Database())
             {
-                var query = "select * from vw_buscar_passagem where date(saida) = date('"+data+ "') and ori_uf = '"+origem+"' and des_uf = '"+destino+"'";
+                string query;
+                if (classe == 1 ||classe == 2)
+                    query = "select * from vw_buscar_passagem_ida where date(saida) = date('"+data+"') and ori_city = '"+origem+"' and des_city = '"+destino+"' and " +
+                        "classe = "+ classe +"";
+                else
+                    query = "select * from vw_buscar_passagem_ida where date(saida) = date('" + data +"') and ori_city = '" + origem + "' and des_city = '" + destino + "'";
+
                 var retorno = DB.ReturnCommand(query);
                 return Listar(retorno);
             }
@@ -46,30 +52,29 @@ namespace API_Reist.Models
             var passagens = new List<Passagem>();
             while (retorno.Read())
             {
-                var enderecoObjOrigem = new Endereco()
+                var enderecoOrigem = new Endereco()
                 {
                     uf = retorno["ori_uf"].ToString(),
+                    cidade = retorno["ori_city"].ToString(),
                 };
 
-                var enderecoObjDestino = new Endereco()
+                var enderecoDestino = new Endereco()
                 {
                     uf = retorno["des_uf"].ToString(),
+                    cidade = retorno["des_city"].ToString(),
                 };
 
                 var Origem = new Local()
                 {
-                    nome = retorno["origem"].ToString(),
-                    endereco = enderecoObjOrigem
+                    sigla = retorno["origem"].ToString(),
+                    endereco = enderecoOrigem
                 };
 
                 var Destino = new Local()
                 {
-                    nome = retorno["destino"].ToString(),
-                    endereco = enderecoObjDestino
-                };
-
-                //var clas;
-                //if (int.Parse(retorno["assentos_executiva"].ToString()) == 1)                    
+                    sigla = retorno["destino"].ToString(),
+                    endereco = enderecoDestino
+                };                 
 
                 var passagem = new Passagem()
                 {
@@ -78,8 +83,7 @@ namespace API_Reist.Models
                     saida = retorno["saida"].ToString(),
                     chegada = retorno["chegada"].ToString(),
                     assentos = int.Parse(retorno["assentos"].ToString()),
-                    preco = retorno["preco"].ToString(),
-                    //classe = clas,                    
+                    preco = retorno["preco"].ToString(),                
                 };
 
                 if (int.Parse(retorno["classe"].ToString()) == 2)
@@ -92,5 +96,11 @@ namespace API_Reist.Models
             retorno.Close();
             return passagens;
         }
+    }
+
+    public class IdaVolta
+    {
+        public Passagem ida { get; set; }
+        public Passagem volta { get; set; }
     }
 }

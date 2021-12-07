@@ -19,7 +19,6 @@ namespace API_Reist.Models
         public string sexo { get; set; }
         //public DateTime nascimento { get; set; }
         public string nascimento { get; set; }
-        public string numero { get; set; }
         public Endereco endereco { get; set; }
         public Cliente() { }
 
@@ -31,7 +30,7 @@ namespace API_Reist.Models
             {
                 var query = string.Format("call cadastrar_cliente({0}, '{1}', '{2}', '{3}', '{4}', '{5}', str_to_date('{6}', '%d/%m/%Y'), {7}, '{8}', " +
                     "'{9}', '{10}', '{11}','{12}');", this.cpf, this.nome, this.email, hash.Criptografar(this.senha), this.celular,this.sexo, this.nascimento,
-                    this.endereco.cep, this.endereco.logradouro, this.endereco.bairro, this.endereco.cidade, this.endereco.uf, this.numero);
+                    this.endereco.cep, this.endereco.logradouro, this.endereco.bairro, this.endereco.cidade, this.endereco.uf, this.endereco.numero);
 
                 MySqlCommand cmd = new MySqlCommand(query, DB.connection);
                 cmd.ExecuteNonQuery();
@@ -64,7 +63,7 @@ namespace API_Reist.Models
                     cidade = retorno["cidade"].ToString(),
                     bairro = retorno["bairro"].ToString(),
                     logradouro = retorno["logradouro"].ToString(),
-
+                    numero = int.Parse(retorno["logradouro"].ToString()),                    
                 };
 
                 var cliente = new Cliente()

@@ -14,9 +14,9 @@ namespace API_Reist.Controllers
 
         [HttpGet]
         [ActionName("Buscar")]
-        public IEnumerable ListBy(string origem, string destino, string data)
+        public IEnumerable ListBy(string cidadeOrigem, string cidadeDestino, string data, int classe)
         {
-            return passagem.BuscarPassagensIda(origem, destino, data);
+            return passagem.BuscarPassagensIda(cidadeOrigem, cidadeDestino, data, classe);
         }
     }
 }
