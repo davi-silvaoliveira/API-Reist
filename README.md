@@ -5,7 +5,7 @@
 <p align="center">API da Reist Turismo, agência de turismo, tema de TCC do grupo <a href="https://linkenup.github.io/">LinkenUp</a>.</p>
 
 <p align="center">
- <a href="#nomes">Integrantes</a> •
+ <a href="#dizzy-nomes">Integrantes</a> •
  <a href="#sobre">Descrição</a> • 
  <a href="#videos">Vídeos</a> • 
  <a href="#tecnologias">Tecnologias</a> • 
@@ -13,7 +13,7 @@
  <a href="#autor">Autor</a>
 </p>
 <hr/>
-## nomes
+## :dizzy: **Nomes**
 • Bruno
 • Davi
 • Guilherme Santos
