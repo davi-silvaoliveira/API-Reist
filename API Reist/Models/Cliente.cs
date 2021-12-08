@@ -82,35 +82,48 @@ namespace API_Reist.Models
             return clientes;
         }
 
-        /*public bool Autenticar()
+        public bool Autenticar(string email, string senha)
         {
             using (Database database = new Database())
             {
+                //email = this.email;
                 Hash hash = new Hash(SHA512.Create());
-                //this.senha = hash.Criptografar(this.senha);
+                //senha = hash.Criptografar(senha);
 
-                string command = string.Format("select * from cliente where email = '{0}';", this.email);
+                string command = "select * from cliente where email = '"+email+"';";
                 MySqlDataReader reader = database.ReturnCommand(command);
                 reader.Read();
 
                 if (reader.HasRows)
                 {
-                    return hash.Verificar(this.senha, reader["senha"].ToString());
+                    if (senha == reader["senha"].ToString())
+                        return true;
+                    else
+                        return false;
                 }
                 else
                 {
-                    command = string.Format("select * from funcionario where email = '{0}';", this.email);
+                    return false;
+                }
+
+                /*if (reader.HasRows)
+                {
+                    return hash.Verificar(senha, reader["senha"].ToString());
+                }
+                else
+                {
+                    command = string.Format("select * from funcionario where email = '{0}';", email);
                     reader = database.ReturnCommand(command); reader.Read();
                     if (reader.HasRows)
                     {
-                        this.nivel = int.Parse(reader["acesso"].ToString());
-                        return hash.Verificar(this.senha, reader["senha"].ToString());
+                        //this.nivel = int.Parse(reader["acesso"].ToString());
+                        return hash.Verificar(senha, reader["senha"].ToString());
                     }
                     else
                         reader.Close(); return false;
-                }
-            }*/
-
+                }*/
+            }
+        }
 
         public class Hash
         {

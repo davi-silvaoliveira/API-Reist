@@ -13,10 +13,17 @@ namespace API_Reist.Controllers
         Passagem passagem = new Passagem();
 
         [HttpGet]
-        [ActionName("Buscar")]
-        public IEnumerable ListBy(string cidadeOrigem, string cidadeDestino, string data, int classe)
+        [ActionName("BuscarIda")]
+        public IEnumerable ListIda(string cidadeOrigem, string cidadeDestino, string data, int classe)
         {
             return passagem.BuscarPassagensIda(cidadeOrigem, cidadeDestino, data, classe);
+        }
+
+        [HttpGet]
+        [ActionName("BuscarIdaVolta")]
+        public IEnumerable ListIdaVolta(string cidadeOrigem, string cidadeDestino, string dataIda, string dataVolta, int classe)
+        {
+            return passagem.BuscarPassagensIdaVolta(cidadeOrigem, cidadeDestino, dataIda, dataVolta,  classe);
         }
     }
 }

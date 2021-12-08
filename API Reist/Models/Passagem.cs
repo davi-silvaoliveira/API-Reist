@@ -26,26 +26,35 @@ namespace API_Reist.Models
             using (Database DB = new Database())
             {
                 string query;
-                if (classe == 1 ||classe == 2)
-                    query = "select * from vw_buscar_passagem_ida where date(saida) = date('"+data+"') and ori_city = '"+origem+"' and des_city = '"+destino+"' and " +
-                        "classe = "+ classe +"";
+                if (classe == 1 || classe == 2)
+                    query = "select * from vw_buscar_passagem_ida where date(saida) = date('" + data + "') and ori_city = '" + origem + "' and des_city = '" + destino + "' and " +
+                        "classe = " + classe + "";
                 else
-                    query = "select * from vw_buscar_passagem_ida where date(saida) = date('" + data +"') and ori_city = '" + origem + "' and des_city = '" + destino + "'";
+                    query = "select * from vw_buscar_passagem_ida where date(saida) = date('" + data + "') and ori_city = '" + origem + "' and des_city = '" + destino + "'";
 
                 var retorno = DB.ReturnCommand(query);
                 return Listar(retorno);
             }
         }
 
-        /*public List<Passagem> BuscarPassagensIdaVolta(string origem, string destino, string dataIda, string dataVolta)
+        public List<IdaVolta> BuscarPassagensIdaVolta(string origem, string destino, string dataIda, string dataVolta, int classe)
         {
             using (Database DB = new Database())
             {
-                var query = "select * from vw_buscar_passagem where date(saida) = date('" + data + "') and ori_uf = '" + origem + "' and des_uf = '" + destino + "'";
+                string query;
+                if (classe == 1 || classe == 2)
+                    query = "select id_ida, id_volta from vw_buscar_passagem_ida_volta where date(saida_ida) = date('" + dataIda + "') and date(saida_volta) = date('" + dataVolta + "') " +
+                        "and ori_city = '" + origem + "' and des_city = '" + destino + "' and " +
+                        "classe = " + classe + ";";
+                else
+                    query = "select id_ida, id_volta from vw_buscar_passagem_ida_volta where date(saida_ida) = date('" + dataIda + "') and date(saida_volta) = date('" + dataVolta + "') " +
+                        "and ori_city = '" + origem + "' and des_city = '" + destino + "';";
                 var retorno = DB.ReturnCommand(query);
-                return Listar(retorno);
+
+                retorno.Close();
+                return ListarPorID(retorno);
             }
-        }*/
+        }
 
         public List<Passagem> Listar(MySqlDataReader retorno)
         {
@@ -74,7 +83,7 @@ namespace API_Reist.Models
                 {
                     sigla = retorno["destino"].ToString(),
                     endereco = enderecoDestino
-                };                 
+                };
 
                 var passagem = new Passagem()
                 {
@@ -83,7 +92,7 @@ namespace API_Reist.Models
                     saida = retorno["saida"].ToString(),
                     chegada = retorno["chegada"].ToString(),
                     assentos = int.Parse(retorno["assentos"].ToString()),
-                    preco = retorno["preco"].ToString(),                
+                    preco = retorno["preco"].ToString(),
                 };
 
                 if (int.Parse(retorno["classe"].ToString()) == 2)
@@ -96,11 +105,83 @@ namespace API_Reist.Models
             retorno.Close();
             return passagens;
         }
-    }
 
-    public class IdaVolta
-    {
-        public Passagem ida { get; set; }
-        public Passagem volta { get; set; }
+        public List<IdaVolta> ListarPorID(MySqlDataReader retorno)
+        {            
+            var idaVoltas = new List<IdaVolta>();
+            //retorno.Ope
+            while (retorno.Read())
+            {
+                using (Database DB = new Database())
+                {
+                    string query = "select * from vw_buscar_passagem_ida where id_passagem = " + retorno["id_ida"].ToString() + ";";
+                    var retornoLocal = DB.ReturnCommand(query);
+
+                    while (retornoLocal.Read())
+                    {
+
+                        var enderecoOrigem = new Endereco()
+                        {
+                            uf = retornoLocal["ori_uf"].ToString(),
+                            cidade = retornoLocal["ori_city"].ToString(),
+                        };
+
+                        var enderecoDestino = new Endereco()
+                        {
+                            uf = retornoLocal["des_uf"].ToString(),
+                            cidade = retornoLocal["des_city"].ToString(),
+                        };
+
+                        var Origem = new Local()
+                        {
+                            sigla = retornoLocal["origem"].ToString(),
+                            endereco = enderecoOrigem
+                        };
+
+                        var Destino = new Local()
+                        {
+                            sigla = retornoLocal["destino"].ToString(),
+                            endereco = enderecoDestino
+                        };
+
+                        var passagemIda = new Passagem()
+                        {
+                            origem = Origem,
+                            destino = Destino,
+                            saida = retornoLocal["saida"].ToString(),
+                            chegada = retornoLocal["chegada"].ToString(),
+                            assentos = int.Parse(retornoLocal["assentos"].ToString()),
+                            preco = retornoLocal["preco"].ToString(),
+                        };
+
+                        if (int.Parse(retornoLocal["classe"].ToString()) == 2)
+                            passagemIda.classe = "Executiva";
+                        else
+                            passagemIda.classe = "Econômica";
+
+                        var idaVolta = new IdaVolta()
+                        {
+                            ida = passagemIda,
+                            volta = null,
+                        };
+
+                        idaVoltas.Add(idaVolta);
+                    }
+                    retornoLocal.Close();
+                }
+            
+                retorno.Close();
+                //retornoLocal.Close();
+                //return idaVoltas;
+            }
+            return idaVoltas;
+        }
+
+        public class IdaVolta
+        {
+            public Passagem ida { get; set; }
+            public Passagem volta { get; set; }
+
+        }
     }
 }
