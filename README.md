@@ -27,7 +27,8 @@
 <p>Bruno explicando o script Mysql - <a href="https://youtu.be/zWsaDcAQnxA">Link do vídeo</a>.</p>
 <p>Nícolas explicando o código da API - <a href="https://youtu.be/Fxj3ubPN4cc">Link do vídeo</a>.</p>
 <p>Davi mostrando serviços do Microsoft Azure - <a href="https://youtu.be/YliZArRXDuE">Link do vídeo</a>.</p>
-<p>Repositório do aplicativo (vídeo do Renan Damprelli) - <a href="https://linkenup.github.io/">Link do repositório</a>.</p>
+<p>Renan Damprelli mostrando a aplicação mobile - <a href="https://www.youtube.com/watch?v=Au7MgQlYFIY">Link do vídeo</a>.</p>
+<p>Repositório da aplicação mobile - <a href="https://www.youtube.com/watch?v=Au7MgQlYFIY">Link do REPOSITÓRIO</a>.</p>
 <hr/>
 ## tecnologias
 <br/>
