@@ -28,7 +28,7 @@
 <p>Nícolas explicando o código da API - <a href="https://youtu.be/Fxj3ubPN4cc">Link do vídeo</a>.</p>
 <p>Davi mostrando serviços do Microsoft Azure - <a href="https://youtu.be/YliZArRXDuE">Link do vídeo</a>.</p>
 <p>Renan Damprelli mostrando a aplicação mobile - <a href="https://www.youtube.com/watch?v=Au7MgQlYFIY">Link do vídeo</a>.</p>
-<p>Repositório da aplicação mobile - <a href="https://www.youtube.com/watch?v=Au7MgQlYFIY">Link do REPOSITÓRIO</a>.</p>
+<p>Repositório da aplicação mobile - <a href="https://github.com/RenanDamprelli/Reist_Mobile">Link do REPOSITÓRIO</a>.</p>
 <hr/>
 ## tecnologias
 <br/>
