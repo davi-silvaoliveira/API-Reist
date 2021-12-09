@@ -246,6 +246,10 @@ create view vw_listar_enderecos as
 select en.cep, en.logradouro, b.nome_bairro as bairro, c.nome_cidade as cidade, e.UF_estado as estado from endereco as en 
 inner join bairro as b on en.bairro = b.id_bairro inner join cidade as c on b.cidade = c.id_cidade inner join estado as e on c.UF = e.id_estado;
 
+create view vw_buscar_locais as
+select l.id_local, l.sigla, l.nome_local, l.numero_endereco, vw.cep, vw.logradouro, vw.bairro, vw.cidade, vw.estado from local as l
+inner join vw_listar_enderecos as vw on l.endereco = vw.cep;
+
 create view vw_buscar_passagem_ida as
 select p.id_passagem as id_passagem, p.saida as saida, p.chegada as chegada, p.assentos, p.preco, p.classe, o.sigla as origem,
 d.sigla as destino, end_origem.estado as ori_uf, end_origem.cidade as ori_city, end_destino.estado as des_uf, end_destino.cidade as des_city from passagem as p 
@@ -348,6 +352,7 @@ select date_format(saida, '%d/%m/%Y') as saida from passagem;
 select * from vw_listar_enderecos;
 select * from vw_listar_clientes;
 select * from vw_buscar_hotel;
+select * from vw_buscar_locais;
 select * from vw_buscar_passagem_ida where id_passagem = 1;
 select * from vw_buscar_passagem_ida_volta;
 select * from vw_buscar_hotel where estado = "SC" and cidade = "São José dos Pinhais";

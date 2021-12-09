@@ -14,7 +14,7 @@ namespace API_Reist.Controllers
 
         [HttpGet]
         [ActionName("Login")]
-        public bool Login(string email, string senha)
+        public Cliente Login(string email, string senha)
         {
             return client.Autenticar(email, senha);
         }

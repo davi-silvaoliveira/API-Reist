@@ -43,8 +43,7 @@ namespace API_Reist.Models
         {
             using (Database DB = new Database())
             {
-                var query = "select cpf, nome, email, senha, celular, sexo, vw.cep, vw.logradouro, vw.bairro, vw.cidade, " +
-                    "vw.estado from cliente inner join vw_listar_enderecos as vw where vw.cep = endereco;";
+                var query = "select * from vw_listar_clientes;";
                 var retorno = DB.ReturnCommand(query);
                 return Listar(retorno);
             }
@@ -53,7 +52,6 @@ namespace API_Reist.Models
         public List<Cliente> Listar(MySqlDataReader retorno)
         {
             var clientes = new List<Cliente>();
-            //var enderec = new Endereco();
             while (retorno.Read())
             {
                 var enderecoObj = new Endereco()
@@ -63,17 +61,17 @@ namespace API_Reist.Models
                     cidade = retorno["cidade"].ToString(),
                     bairro = retorno["bairro"].ToString(),
                     logradouro = retorno["logradouro"].ToString(),
-                    numero = int.Parse(retorno["logradouro"].ToString()),                    
+                    numero = int.Parse(retorno["numero_endereco"].ToString()),                    
                 };
 
                 var cliente = new Cliente()
                 {
                     endereco = enderecoObj,
                     nome = retorno["nome"].ToString(),
-                    //cpf = long.Parse(retorno["cpf"].ToString()),
+                    cpf = retorno["cpf"].ToString(),
                     email = retorno["email"].ToString(),
                     senha = retorno["senha"].ToString(),
-                    //celular = long.Parse(retorno["celular"].ToString()),
+                    celular = retorno["celular"].ToString(),
                     sexo = retorno["sexo"].ToString(),
                 };
                 clientes.Add(cliente);
@@ -82,28 +80,49 @@ namespace API_Reist.Models
             return clientes;
         }
 
-        public bool Autenticar(string email, string senha)
+        public Cliente Autenticar(string email, string senha)
         {
             using (Database database = new Database())
             {
-                //email = this.email;
                 Hash hash = new Hash(SHA512.Create());
-                //senha = hash.Criptografar(senha);
+                this.senha = hash.Criptografar(senha);
 
-                string command = "select * from cliente where email = '"+email+"';";
+                string command = "select * from vw_listar_clientes where email = '"+ email+"';";
                 MySqlDataReader reader = database.ReturnCommand(command);
+                //return this.senha;
                 reader.Read();
 
                 if (reader.HasRows)
                 {
-                    if (senha == reader["senha"].ToString())
-                        return true;
+                    if (this.senha == reader["senha"].ToString())
+                    {
+                                                
+                        this.nome = reader["nome"].ToString();
+                        this.cpf = reader["cpf"].ToString();
+                        this.email = reader["email"].ToString();
+                        this.senha = reader["senha"].ToString();
+                        this.celular = reader["celular"].ToString();
+                        this.sexo = reader["sexo"].ToString();
+
+                        Endereco enderecoObj = new Endereco();
+
+                        enderecoObj.cep = reader["cep"].ToString();
+                        enderecoObj.uf = reader["estado"].ToString();
+                        enderecoObj.cidade = reader["cidade"].ToString();
+                        enderecoObj.bairro = reader["bairro"].ToString();
+                        enderecoObj.logradouro = reader["logradouro"].ToString();
+                        enderecoObj.numero = int.Parse(reader["numero_endereco"].ToString());                        
+
+                        this.endereco = enderecoObj;
+
+                        return this;
+                    }
                     else
-                        return false;
+                        return null;
                 }
                 else
                 {
-                    return false;
+                    return null;
                 }
 
                 /*if (reader.HasRows)
