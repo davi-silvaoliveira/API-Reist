@@ -15,8 +15,8 @@ namespace API_Reist.Connection
 
         public Database()
         {
-            connection = new MySqlConnection("server = localhost; port = 3306; database = reist_2021; user id = root; password = root");
-            //connection = new MySqlConnection("server = reistdatabase.mysql.database.azure.com; port = 3306; database = reist_2021; user id = admreistdatabase@reistdatabase; password = LinkenUp2019");
+            //connection = new MySqlConnection("server = localhost; port = 3306; database = reist_2021; user id = root; password = root; Allow User Variables=True");
+            connection = new MySqlConnection("server = reistdatabaseazure.mysql.database.azure.com; port = 3306; database = reist_2021; user id = brunodatabase@reistdatabaseazure; password = brunoDB2021; Allow User Variables = True");
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
         }

@@ -156,8 +156,8 @@ create table pagamento_compra(
     data_pagamento date not null,
     constraint fk_cliente_pagamento foreign key (cpf_cliente) references cliente(cpf),
     constraint fk_cartao_pagamento foreign key (cartao) references cartao(id_cartao),
-    constraint fk_pacote_compra foreign key (id_pacote) references pacote(id_pacote),
-    constraint fk_viagem_compra foreign key (id_viagem) references pacote(id_pacote)
+    foreign key (id_pacote) references pacote(id_pacote),
+    foreign key (id_viagem) references viagem(id_viagem)
 );
 
 alter table local modify numero_endereco int null;
@@ -184,6 +184,42 @@ insert into cliente values(thisCpf, thisNome, thisEmail, thisSenha, thisCelular,
 end $$
 delimiter ;
 
+delimiter $$
+create procedure verificar_assentos(in thisIdPassagem int, out assentos_ocupados int)
+begin
+
+declare total int;
+declare ida_pacote int;
+declare volta_pacote int;
+declare ida_comum int;
+declare volta_comum int;
+
+-- if (x = 0) then call verificar_endereco(thisCep, thisLogradouro, thisBairro, thisCidade, thisUf); end if;
+
+-- na ida de pacote
+set ida_pacote = (select sum(quantidade_pessoas) from viagem as v inner join pacote as p inner join pagamento_compra as pc
+where v.id_viagem = p.id_viagem and v.ida = thisIdPassagem and pc.id_pacote = p.id_pacote);
+
+-- na volta de pacote
+ set volta_pacote = (select sum(quantidade_pessoas) from viagem as v inner join pacote as p inner join pagamento_compra as pc
+ where v.id_viagem = p.id_viagem and v.volta = thisIdPassagem and pc.id_pacote = p.id_pacote);
+
+-- na ida sem ser pacote
+set ida_comum = (select sum(quantidade_pessoas) from viagem as v  inner join pagamento_compra as pc
+where v.id_viagem = pc.id_viagem and v.ida = thisIdPassagem);
+
+-- na volta sem ser pacote
+set volta_comum = (select sum(quantidade_pessoas) from viagem as v  inner join pagamento_compra as pc
+where v.id_viagem = pc.id_viagem and v.volta = thisIdPassagem);
+
+set total = ifnull(ida_pacote, 0) + ifnull(volta_pacote, 0) + ifnull(ida_comum, 0) + ifnull(volta_comum, 0);
+set assentos_ocupados = total;
+
+end $$
+delimiter ;
+
+call verificar_assentos(1, @assentos_ocupados);
+select @assentos_ocupados as a;
 
 delimiter $$
 create procedure verificar_endereco(in thisCep int(11), in thisLogradouro varchar(100), in thisBairro varchar(100), in thisCidade varchar(100),
@@ -269,11 +305,24 @@ create view vw_buscar_hotel as
 select cnpj_hotel, nome_hotel, descricao, numero_endereco, vw.cep, vw.logradouro, vw.bairro, vw.cidade, vw.estado
 from hotel inner join vw_listar_enderecos as vw where hotel.endereco = vw.cep;
 
+create view vw_buscar_quarto as
+select q.id, q.nome, q.precoDiaria, vw.cep, vw.nome_hotel, vw.logradouro, vw.bairro, vw.cidade, vw.estado
+from quarto as q inner join vw_buscar_hotel as vw where q.cnpj_hotel = vw.cnpj_hotel;
+
 create view vw_listar_clientes as
 select cpf, nome, email, senha, celular, sexo, numero_endereco, vw.cep, vw.logradouro, vw.bairro, vw.cidade, vw.estado from cliente 
 inner join vw_listar_enderecos as vw where vw.cep = endereco;
 
--- create view vw_listar_clientes as
+create view vw_listar_pacotes as
+select p.id_pacote, p.descricao, p.desconto, v.ida, v.volta, vwp.classe, vwp.saida_ida, vwp.saida_volta ,vwp.ori_city, vwp.des_city, vwh.nome_hotel, vwh.nome from pacote as p
+inner join viagem as v inner join vw_buscar_passagem_ida_volta as vwp inner join vw_buscar_quarto as vwh
+where p.id_viagem = v.id_viagem and v.ida = vwp.id_ida and v.quarto = vwh.id;
+
+/*select * from vw_buscar_passagem_ida_volta;
+select * from vw_buscar_hotel;
+select * from vw_buscar_quarto;
+select * from viagem;
+select * from quarto;*/
 
 
 -- INSERTS --
@@ -307,6 +356,9 @@ insert into passagem values(default, '2022-02-20 18:00:00', 2,'2022-02-20 19:00:
 insert into passagem values(default, '2022-02-20 18:00:00', 2,'2022-02-20 19:00:00', 4, 50, 2, 400.00, 06164253000187);
 insert into passagem values(default, '2022-02-28 18:00:00', 2,'2022-02-28 19:00:00', 4, 20, 1, 400.00, 06164253000187);
 
+call cadastrar_cliente(12345665400, "Davi Silva Oliveira", "davi.com", "D404559F602EAB6FD602AC7680DACBFAADD13630335E951F097AF3900E9DE176B6DB28512F2E000B9D04FBA5133E8B1C6E8DF59DB3A8AB9D60BE4B97CC9E81DB",
+"11951982626", "M", str_to_date('4/7/2003', "%d/%m/%Y"),
+02984010, "Charles Mion", "Jardim Pirituba", "São Paulo", "SP", "425");
 
 insert into hotel values(56449952000303, "San Michel Hotel", "Este hotel econômico despretensioso com vista para o Largo do Arouche fica a 6 minutos a pé de uma estação de metrô, a 13 minutos do teatro municipal de São Paulo e a 15 minutos das
 exposições linguísticas no Museu da Língua Portuguesa. As suítes e os quartos simples contam com Wi-Fi gratuito, TV com tela plana e frigobar.
@@ -316,22 +368,32 @@ insert into quarto values(default, "Standart", 20, 2, "Quarto confortável, com 
 (default, "Standart Triplo", 10, 3, "Quarto confortável, com TV e dois banheiros!", 100.00, 56449952000303);
 
 insert into viagem values(default, '2022-01-11 16:00:00', '2022-01-15 18:00:00', 1, 3, 2, 4, 1);
+insert into viagem values(default, '2022-01-11 16:00:00', '2022-01-15 18:00:00', 1, 3, 2, 4, 2);
+insert into viagem values(default, null, null, 1, 3, null, 4, null);
+insert into viagem values(default, null, null, 1, null, null, 4, null);
+insert into viagem values(default, null, null, 3, 1, null, 4, null);
+insert into viagem values(default, null, null, null, null, 2, 4, 1);
+
+insert into cartao values(default, 1234123412341234, '2023-12-01', 123, "C", "Visa");
 
 insert into pacote values(default, "Pacote de São Paulo para Paraná, com 2 quartos pra 4 pessoas", 20, 1);
+insert into pacote values(default, "Pacote de São Paulo para Paraná, só que melhor!", 20, 3);
 
--- insert into cartao values(default, 1234123412341234, '2023-12-01', 123, "C", "Visa");
+insert into pagamento_compra values(default, 12345665400, null, 2, 1, 1, curdate());
+insert into pagamento_compra values(default, 12345665400, 2, null, 1, 1, curdate());
+insert into pagamento_compra values(default, 12345665400, 1, null, 1, 2, curdate());
+insert into pagamento_compra values(default, 12345665400, null, 4, 1, 2, curdate());
+insert into pagamento_compra values(default, 12345665400, null, 5, 1, 2, curdate());
+insert into pagamento_compra values(default, 12345665400, null, 6, 1, 2, curdate());
 
--- insert into compra values();
-
-call cadastrar_cliente(12345665400, "Davi Silva Oliveira", "davi", "123",
-"11951982626", "M", str_to_date('4/7/2003', "%d/%m/%Y"),
-02984010, "Charles Mion", "Jardim Pirituba", "São Paulo", "SP", "425");
-
+insert into funcionario values("12345665400", "bruno", "bruno.com",
+"D404559F602EAB6FD602AC7680DACBFAADD13630335E951F097AF3900E9DE176B6DB28512F2E000B9D04FBA5133E8B1C6E8DF59DB3A8AB9D60BE4B97CC9E81DB",
+"11951982626", "M", 423, str_to_date('4/7/2003', "%d/%m/%Y"), 02984010, 1, 100, "Faxineiro");
 
 -- SELECTIONS --
 
 
-select * from bairro;
+/*select * from bairro;
 select * from cidade;
 select * from estado;
 select * from endereco;
@@ -347,31 +409,43 @@ select * from cartao;
 select * from pagamento_compra;
 select * from local;
 select * from empresa;
-select date_format(saida, '%d/%m/%Y') as saida from passagem;
+select date_format(saida, '%d/%m/%Y') as saida from passagem;*/
 
-select * from vw_listar_enderecos;
+/*CREATE FUNCTION GetAIntFromStoredProc(idPassagem int) RETURNS INT
+begin
+call verificar_assentos(idPassagem, @assentos_ocupados)
+RETURN (select @assentos_ocupados);
+end*/
+
+
+
+/*select * from vw_listar_enderecos;
 select * from vw_listar_clientes;
 select * from vw_buscar_hotel;
-select * from vw_buscar_locais;
-select * from vw_buscar_passagem_ida where id_passagem = 1;
+select * from vw_buscar_quarto;
+select * from vw_buscar_passagem_ida;
 select * from vw_buscar_passagem_ida_volta;
+select * from vw_listar_pacotes;
+select * from vw_listar_pacotes where ori_city = 'Guarulhos' and des_city = 'Curitiba' and classe = 1 and date(saida_ida) = date('2022-01-01') and date(saida_volta) = date('2022-01-15');
+
+
 select * from vw_buscar_hotel where estado = "SC" and cidade = "São José dos Pinhais";
 select *, date_format(saida, '%d/%m/%Y') as saida from vw_buscar_passagem_ida where date(saida) = date('2021-12-25') and ori_city = "Guarulhos" and des_city = "São José dos Pinhais";
 select * from vw_buscar_passagem_ida where date(saida) = date('2022-01-15') and des_city = "Guarulhos" and ori_city = "São José dos Pinhais" and classe = 1;
 select * from vw_buscar_passagem_ida_volta where date(saida_ida) = date('2022-01-01') and date(saida_volta) = date('2022-01-15') and ori_city = 'Guarulhos' and des_city = 'Curitiba';
-select id_ida, id_volta from vw_buscar_passagem_ida_volta where date(saida_ida) = date('2022-01-01') and date(saida_volta) = date('2022-01-15') and ori_city = 'Guarulhos' and des_city = 'Curitiba';
-select * from pacote as p inner join viagem as v inner join vw_buscar_passagem_ida_volta as pass /*inner join hotel as h*/ where p.id_viagem = v.id_viagem and
-pass.id_ida = v.ida and pass.id_volta = v.volta;
+select id_ida, id_volta from vw_buscar_passagem_ida_volta where date(saida_ida) = date('2022-01-01') and date(saida_volta) = date('2022-01-15') and ori_city = 'Guarulhos' and des_city = 'Curitiba';*/
+-- select * from pacote as p inner join viagem as v inner join vw_buscar_passagem_ida_volta as pass /*inner join hotel as h*/ -- where p.id_viagem = v.id_viagem and
+-- pass.id_ida = v.ida and pass.id_volta = v.volta;
 
-select count(*) from estado where uf_estado = "kk";
+/*select count(*) from estado where uf_estado = "kk";
 select count(*) from endereco where cep = 02525111;
 select count(*) from cidade where nome_cidade = "dd" and "kk";
-select count(*) from endereco where cep = 02525188 and bairro = 12;
+select count(*) from endereco where cep = 02525188 and bairro = 12;/*
 
 
--- drop table quarto;
+-- drop table pagamento_compra;
 -- truncate table local;
--- drop procedure cadastrar_cliente;3C9909AFEC25354D551DAE21590BB26E38D53F2173B8D3DC3EEE4C047E7AB1C1EB8B85103E3BE7BA613B31BB5C9C36214DC9F14A42FD7A2FDB84856BCA5C44C2
--- drop view vw_buscar_passagem_ida;
+-- drop procedure verificar_assentos;
+-- drop view vw_listar_pacotes;
 -- truncate table cliente;
 -- drop database reist_2021;
