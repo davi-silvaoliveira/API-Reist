@@ -22,7 +22,7 @@ namespace API_Reist.Models
         //public string preco_economica { get; set; }
         public string preco { get; set; }
 
-        public List<Passagem> BuscarPassagensIda(string origem, string destino, string data, int classe)
+        public List<Passagem> BuscarPassagensIda(string origem, string destino, string data, int classe, int pessoas)
         {
             using (Database DB = new Database())
             {
@@ -34,11 +34,11 @@ namespace API_Reist.Models
                     query = "select * from vw_buscar_passagem_ida where date(saida) = date('" + data + "') and ori_city = '" + origem + "' and des_city = '" + destino + "'";
 
                 var retorno = DB.ReturnCommand(query);
-                return Listar(retorno);
+                return Listar(retorno, pessoas);
             }
         }
 
-        public List<IdaVolta> BuscarPassagensIdaVolta(string origem, string destino, string dataIda, string dataVolta, int classe)
+        public List<IdaVolta> BuscarPassagensIdaVolta(string origem, string destino, string dataIda, string dataVolta, int classe, int p)
         {
             using (Database DB = new Database())
             {
@@ -51,21 +51,9 @@ namespace API_Reist.Models
                     query = "select id_ida, id_volta from vw_buscar_passagem_ida_volta where date(saida_ida) = date('" + dataIda + "') and date(saida_volta) = date('" + dataVolta + "') " +
                         "and ori_city = '" + origem + "' and des_city = '" + destino + "';";
                 var retorno = DB.ReturnCommand(query);
-                return ListarIdaVolta(retorno);
+                return ListarIdaVolta(retorno, p);
             }
         }
-
-        /*public int Assentos(int id)
-        {
-            using (Database database = new Database())
-            {
-                string command = "select * from passagem where id_passagem = " + id + "";
-                MySqlDataReader retorno = database.ReturnCommand(command);
-                retorno.Read();
-                int assentos = int.Parse(retorno["assentos"].ToString());
-                return assentos;
-            }
-        }*/
 
         public void verificar_assentos()
         {
@@ -134,7 +122,7 @@ namespace API_Reist.Models
             }
         }
 
-        public List<Passagem> Listar(MySqlDataReader retorno)
+        public List<Passagem> Listar(MySqlDataReader retorno, int p)
         {
             var passagens = new List<Passagem>();
             while (retorno.Read())
@@ -179,6 +167,8 @@ namespace API_Reist.Models
                 else
                     passagem.classe = "Econômica";
 
+                passagem.CalcularPreco(p);
+
                 passagem.verificar_assentos();
 
                 passagens.Add(passagem);
@@ -188,7 +178,7 @@ namespace API_Reist.Models
             return passagens;
         }
 
-        public List<IdaVolta> ListarIdaVolta(MySqlDataReader retorno)
+        public List<IdaVolta> ListarIdaVolta(MySqlDataReader retorno, int p)
         {            
             var idaVoltas = new List<IdaVolta>();
             while (retorno.Read())
@@ -205,19 +195,36 @@ namespace API_Reist.Models
                     volta = passagemVolta,
                 };
 
+                IdaVolta.PrecoIdaVolta(p);
+
                 idaVoltas.Add(IdaVolta);               
             }
             retorno.Close();
             return idaVoltas;
         }
 
-        
-    }
+        public void CalcularPreco(int pessoas)
+        {
+            float total = float.Parse(this.preco) * pessoas;
+            this.preco = total.ToString();
+        }
+    }    
 
     public class IdaVolta
     {
+        public float precoFinal { get; set; }
         public Passagem ida { get; set; }
         public Passagem volta { get; set; }
 
+
+        public void PrecoIdaVolta(int pessoas)
+        {
+            ida.CalcularPreco(pessoas);
+            volta.CalcularPreco(pessoas);
+
+
+            float total = float.Parse(ida.preco) + float.Parse(volta.preco);
+            this.precoFinal = total;
+        }
     }
 }

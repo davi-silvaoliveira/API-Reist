@@ -14,16 +14,16 @@ namespace API_Reist.Controllers
 
         [HttpGet]
         [ActionName("BuscarIda")]
-        public IEnumerable ListIda(string cidadeOrigem, string cidadeDestino, string data, int classe)
+        public IEnumerable ListIda(string cidadeOrigem, string cidadeDestino, string data, int classe, int pessoas)
         {
-            return passagem.BuscarPassagensIda(cidadeOrigem, cidadeDestino, data, classe);
+            return passagem.BuscarPassagensIda(cidadeOrigem, cidadeDestino, data, classe, pessoas);
         }
 
         [HttpGet]
         [ActionName("BuscarIdaVolta")]
-        public IEnumerable ListIdaVolta(string cidadeOrigem, string cidadeDestino, string dataIda, string dataVolta, int classe)
+        public IEnumerable ListIdaVolta(string cidadeOrigem, string cidadeDestino, string dataIda, string dataVolta, int classe, int pessoas)
         {
-            return passagem.BuscarPassagensIdaVolta(cidadeOrigem, cidadeDestino, dataIda, dataVolta,  classe);
+            return passagem.BuscarPassagensIdaVolta(cidadeOrigem, cidadeDestino, dataIda, dataVolta,  classe, pessoas);
         }
     }
 }

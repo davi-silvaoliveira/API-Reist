@@ -14,9 +14,9 @@ namespace API_Reist.Controllers
 
         [HttpGet]
         [ActionName("Listar")]
-        public IEnumerable ListBy(long id)
+        public IEnumerable ListBy(long idHotel, string checkin, string checkout, int quartos)
         {
-            return quarto.ListarQuartos(id);
+            return quarto.ListarQuartos(idHotel, checkin, checkout, quartos);
         }
     }
 }

@@ -10,19 +10,54 @@ namespace API_Reist.Models
     public class Compra
     {
         public int id { get; set; }
+        public string cpf { get; set; }
         public int parcelas { get; set; }
+        public int idPacote { get; set; }
+        public int ida { get; set; }
+        public int volta { get; set; }
+        public int quarto { get; set; }
+        public int quantQuartos { get; set; }
+        public int quantPessoas { get; set; }
+        public string checkin { get; set; }
+        public string checkout { get; set; }
+        public float valorCompra { get; set; }
         public string dataPagamento { get; set; }
+        public Cartao cartao { get; set; }
         public Pacote pacote { get; set; }
         public Viagem viagem { get; set; }
 
-        public void ComprarPacote()
+        public void InserirCompraIda()
+        {
+            cartao.Inserir();
+            viagem.InserirViagemIda();
+            InserirPagamento();
+        }
+
+        public void InserirCompraIdaVolta()
+        {
+            cartao.Inserir();
+            viagem.InserirViagemIdaVolta();
+            InserirPagamento();
+        }
+
+        public void InserirCompraQuarto()
+        {
+            cartao.Inserir();
+            viagem.InserirViagemQuarto();
+            InserirPagamento();
+        }
+        public void InserirCompraPacote()
+        {
+            cartao.Inserir();
+            InserirPagamentoPacote();
+        }
+
+        public void InserirPagamento()
         {
             using (Database DB = new Database())
             {
-                var query = string.Format("call cadastrar_cliente({0}, '{1}', '{2}', '{3}', '{4}', '{5}', str_to_date('{6}', '%d/%m/%Y'), {7}, '{8}', " +
-                    "'{9}', '{10}', '{11}','{12}');", this.cpf, this.nome, this.email, hash.Criptografar(this.senha), this.celular, this.sexo, this.nascimento,
-                    this.endereco.cep, this.endereco.logradouro, this.endereco.bairro, this.endereco.cidade, this.endereco.uf, this.endereco.numero);
-
+                //this.cpf = 
+                var query = "insert into pagamento_compra values(default, " + this.cpf + ", null, " + this.viagem.id + ", " + this.cartao.id + ", "+this.parcelas+", curdate(), "+this.valorCompra+");";
                 MySqlCommand cmd = new MySqlCommand(query, DB.connection);
                 cmd.ExecuteNonQuery();
 
@@ -30,19 +65,17 @@ namespace API_Reist.Models
             }
         }
 
-        public void ComprarHospedagem()
+        public void InserirPagamentoPacote()
         {
+            using (Database DB = new Database())
+            {
+                //this.cpf = 
+                var query = "insert into pagamento_compra values(default, " + this.cpf + ", " + this.pacote.id + ", null, " + this.cartao.id + ", " + this.parcelas + ", curdate(), " + this.valorCompra + ");";
+                MySqlCommand cmd = new MySqlCommand(query, DB.connection);
+                cmd.ExecuteNonQuery();
 
-        }
-
-        public void ComprarIda()
-        {
-
-        }
-
-        public void ComprarIdaVolta()
-        {
-
+                //return this;
+            }
         }
     }
 }
